@@ -20,7 +20,16 @@ class QwenAgent:
         """
         # 使用 Qwen2.5-1.5B-Instruct 模型
         if model_path is None:
-            model_path = "Qwen/Qwen2.5-1.5B-Instruct"
+            # 优先使用项目根目录下的 huggingface/hub 本地模型
+            current_dir = Path(__file__).parent
+            local_model_path = current_dir / "huggingface" / "hub" / "models--Qwen--Qwen2.5-1.5B-Instruct"
+            
+            if os.path.exists(local_model_path):
+                model_path = str(local_model_path)
+                print(f"✅ 使用本地模型：{model_path}")
+            else:
+                model_path = "Qwen/Qwen2.5-1.5B-Instruct"
+                print(f"本地模型不存在，将使用 Hugging Face 模型：{model_path}")
 
         print(f"正在加载模型：{model_path} ...")
 
@@ -29,28 +38,6 @@ class QwenAgent:
             print(f"检测到本地模型路径：{model_path}")
             local_model = True
         else:
-            # 检查 Hugging Face 缓存目录
-            cache_dir = Path.home() / ".cache" / "huggingface"
-            print(f"Hugging Face 缓存目录：{cache_dir}")
-
-            # 检查缓存中是否有模型
-            model_cache_exists = False
-            if cache_dir.exists():
-                # 在缓存目录中查找 Qwen2.5-1.5B 模型
-                for model_dir in cache_dir.glob("**/models--*"):
-                    model_path_str = str(model_dir)
-                    if "Qwen" in model_path_str and "1.5B" in model_path_str:
-                        print(f"找到缓存的模型：{model_dir}")
-                        model_cache_exists = True
-                        break
-
-            if model_cache_exists:
-                print("✅ 使用缓存的模型，无需重新下载")
-                local_model = False
-            else:
-                print("❌ 未找到缓存的模型，将从 Hugging Face 下载...")
-                print("💡 下载完成后会自动保存，下次运行无需重新下载")
-                print(f"📦 模型大小约 1-2GB，请耐心等待...\n")
                 local_model = False
 
         # 加载 tokenizer
