@@ -29,7 +29,7 @@ class QwenAgent:
             print(f"检测到本地模型路径：{model_path}")
             local_model = True
         else:
-            # 检查 Hugging Face 缓存目录
+            # 检查 Hugging Face 缓存目录 - 跨平台兼容
             cache_dir = Path.home() / ".cache" / "huggingface"
             print(f"Hugging Face 缓存目录：{cache_dir}")
 
@@ -58,7 +58,8 @@ class QwenAgent:
             model_path,
             trust_remote_code=True,
             padding_side='left',
-            local_files_only=False
+            local_files_only=False,
+            cache_dir=str(cache_dir) if not local_model else None
         )
 
         # 设置 pad_token
@@ -76,7 +77,8 @@ class QwenAgent:
             torch_dtype=torch.float32,
             trust_remote_code=True,
             low_cpu_mem_usage=True,
-            local_files_only=False
+            local_files_only=False,
+            cache_dir=str(cache_dir) if not local_model else None
         )
 
         print("✅ 模型加载完成！")
@@ -326,7 +328,7 @@ def main():
     print("\n提示：")
     print("- CPU 运行较慢，请耐心等待")
     print("- 首次运行会下载模型（约 3-4GB），之后会自动使用缓存")
-    print("- 缓存位置：C:\\Users\\admin\\.cache\\huggingface\n")
+    print(f"- 缓存位置：{Path.home() / '.cache' / 'huggingface'}\n")
 
     # 初始化模型
     try:
